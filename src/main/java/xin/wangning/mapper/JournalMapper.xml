@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xin.wangning.mapper.JournalMapper">
+    <select id="selectAll" resultType="xin.wangning.vo.Journal">
+        select * from 期刊表
+    </select>
+    <insert id="insert" parameterType="xin.wangning.vo.Journal">
+        insert into 期刊表(name,url)values(#{name},#{url})
+    </insert>
+    <select id="selectByName" parameterType="String" resultType="xin.wangning.vo.Journal">
+        select * from 期刊表 where name = #{value}
+    </select>
+</mapper>
