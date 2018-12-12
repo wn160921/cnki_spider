@@ -6,9 +6,11 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import xin.wangning.mapper.JournalMapper;
 import xin.wangning.mapper.LiteratureMapper;
+import xin.wangning.mapper.LiteratureNodeMapper;
 import xin.wangning.mapper.ReferMapper;
 import xin.wangning.vo.Journal;
 import xin.wangning.vo.Literature;
+import xin.wangning.vo.LiteratureNode;
 import xin.wangning.vo.Refer;
 
 import java.io.IOException;
@@ -131,4 +133,13 @@ public class DBHelper {
         sqlSession.close();
         return referList;
     }
+    
+    public static void insertLiteratureNode(LiteratureNode literatureNode) {
+		SqlSession sqlSession = getSqlSessionFactory().openSession();
+		LiteratureNodeMapper literatureNodeMapper = sqlSession.getMapper(LiteratureNodeMapper.class);
+		literatureNodeMapper.insert(literatureNode);
+		sqlSession.commit();
+        sqlSession.close();
+	}
+    
 }

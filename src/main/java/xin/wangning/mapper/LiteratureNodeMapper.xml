@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xin.wangning.mapper.LiteratureNodeMapper">
+	<select id="selectAll" resultType="xin.wangning.vo.LiteratureNode">
+		SELECT *
+ 		FROM 文献节点表
+	</select>
+	
+	<insert id="insert" parameterType="xin.wangning.vo.LiteratureNode">
+		insert into 文献节点表(name,node_type,node_order,text)
+		values(#{name},#{nodeType},#{nodeOrder},#{text})
+	</insert>
+	
+</mapper>

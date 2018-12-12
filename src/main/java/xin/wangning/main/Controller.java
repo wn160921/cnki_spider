@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import xin.wangning.util.DBHelper;
 import xin.wangning.vo.Journal;
 import xin.wangning.vo.Literature;
+import xin.wangning.vo.LiteratureNode;
 import xin.wangning.vo.Refer;
 
 import java.util.ArrayList;
@@ -53,6 +54,28 @@ public class Controller {
         }
     }
 
+    /**
+     * 获取页面上的关于文章的内容
+     */
+    public void crawLiteratureContent(Literature literature) {
+    	driver.get(literature.getUrl());
+    	WebElement content = driver.findElement(By.cssSelector("body > div.main > div.content"));
+    	List<WebElement> nodeList = content.findElements(By.xpath("child::*"));
+    	int nodeOrder = 0;
+    	for(WebElement elem:nodeList) {
+    		nodeOrder++;
+    		LiteratureNode literatureNode = new LiteratureNode();
+    		String nodeType = elem.getTagName();
+    		String text = elem.getText();
+    		literatureNode.setName(literature.getName());
+    		literatureNode.setNodeType(nodeType);
+    		literatureNode.setNodeOrder((short) nodeOrder);
+    		literatureNode.setText(text);
+    		DBHelper.insertLiteratureNode(literatureNode);
+    	}
+    }
+    
+    
     public void crawOrder() {
         List<Literature> literatureList = DBHelper.getAllNeedOrderLiterature();
         for(Literature literature:literatureList){
