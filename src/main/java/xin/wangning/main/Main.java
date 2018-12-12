@@ -1,6 +1,4 @@
-package xin.wangning;
-
-import xin.wangning.main.Controller;
+package xin.wangning.main;
 
 public class Main {
     /**
