@@ -7,7 +7,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import sun.plugin.javascript.navig.AnchorArray;
 import xin.wangning.util.DBHelper;
 import xin.wangning.vo.Journal;
 import xin.wangning.vo.Literature;
