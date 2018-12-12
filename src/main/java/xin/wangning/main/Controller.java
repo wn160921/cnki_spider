@@ -22,7 +22,7 @@ public class Controller {
 
     public Controller() {
         driver = new ChromeDriver();
-        driver.manage().window().maximize();
+//        driver.manage().window().maximize();
         journalList = DBHelper.getJournalList();
     }
 
@@ -37,19 +37,20 @@ public class Controller {
 
     public void start() {
         for (Journal url : journalList) {
-            crawJournal(url);
+            if(!url.getUrl().equals("unknow")) {
+                crawJournal(url);
+            }
         }
     }
 
     public void crawRefer() {
         List<Literature> literatureList = DBHelper.getAllLiture();
         for (Literature literature : literatureList) {
-//            try {
-//                crawRefer(literature);
-//            }catch (Exception e){
-//                e.printStackTrace();
-//            }
-            crawRefer(literature);
+            try {
+                crawRefer(literature);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -106,7 +107,6 @@ public class Controller {
 
 
     private void crawJournal(Journal journal) {
-
         driver.get(journal.getUrl());
         switchWindow(0);
         WebDriverWait webDriverWait = new WebDriverWait(driver, 20);
@@ -117,7 +117,8 @@ public class Controller {
             String year = yearElem.findElement(By.tagName("em")).getText();
             try {
                 int yearNum = Integer.parseInt(year);
-                if (yearNum > 2107 || yearNum < 2013) {
+                //从16年开始，以前的爬过了
+                if (yearNum > 2017 || yearNum < 2013) {
                     continue;
                 }
             } catch (Exception e) {

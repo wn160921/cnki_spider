@@ -8,4 +8,5 @@ public interface JournalMapper {
     public List<Journal> selectAll();
     public void insert(Journal journal);
     public Journal selectByName(String value);
+
 }

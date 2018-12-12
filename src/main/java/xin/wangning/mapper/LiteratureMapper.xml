@@ -4,15 +4,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.wangning.mapper.LiteratureMapper">
     <select id="selectAll" resultType="xin.wangning.vo.Literature">
-        select * from 文献表
+        select * from db_owner.文献表
     </select>
     <insert id="insert" parameterType="xin.wangning.vo.Literature">
-        insert into 文献表(name,url,classify,refer_num,belong,year,phase)values(#{name},#{url},#{classify},#{referNum},#{belong},#{year},#{phase})
+        insert into db_owner.文献表(name,url,classify,refer_num,belong,year,phase)values(#{name},#{url},#{classify},#{referNum},#{belong},#{year},#{phase})
     </insert>
     <select id="selectByName" parameterType="String" resultType="xin.wangning.vo.Literature">
-        select * from 文献表 where name = #{value}
+        select * from db_owner.文献表 where name = #{value}
     </select>
     <update id="update" parameterType="xin.wangning.vo.Literature">
-        update 文献表 set url=#{url},classify=#{classify},refer_num=#{referNum} where name=#{name}
+        update db_owner.文献表 set url=#{url},classify=#{classify},refer_num=#{referNum} where name=#{name}
     </update>
 </mapper>
