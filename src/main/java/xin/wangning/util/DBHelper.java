@@ -38,10 +38,10 @@ public class DBHelper {
         }
     }
 
-    public static List<Journal> getJournalList() {
+    public static List<Journal> getJournalListByRank() {
         SqlSession sqlSession = getSqlSessionFactory().openSession();
         JournalMapper journalMapper = sqlSession.getMapper(JournalMapper.class);
-        List<Journal> journalList = journalMapper.selectAll();
+        List<Journal> journalList = journalMapper.selectByRank(1L);
         sqlSession.close();
         return journalList;
     }
@@ -100,6 +100,14 @@ public class DBHelper {
         SqlSession sqlSession = getSqlSessionFactory().openSession();
         LiteratureMapper literatureMapper = sqlSession.getMapper(LiteratureMapper.class);
         List<Literature> literatureList = literatureMapper.selectAll();
+        sqlSession.close();
+        return literatureList;
+    }
+    
+    public static List<Literature> getAllLitureByRank() {
+        SqlSession sqlSession = getSqlSessionFactory().openSession();
+        LiteratureMapper literatureMapper = sqlSession.getMapper(LiteratureMapper.class);
+        List<Literature> literatureList = literatureMapper.selectByRank(1L);
         sqlSession.close();
         return literatureList;
     }

@@ -15,6 +15,7 @@ import xin.wangning.vo.Refer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Controller {
     private ChromeDriver driver;
@@ -22,12 +23,14 @@ public class Controller {
 
     public Controller() {
         driver = new ChromeDriver();
+        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
 //        driver.manage().window().maximize();
-        journalList = DBHelper.getJournalList();
+        journalList = DBHelper.getJournalListByRank();
     }
 
     private List<String> getJournalUrlList() {
-        List<Journal> journalList = DBHelper.getJournalList();
+        List<Journal> journalList = DBHelper.getJournalListByRank();
         List<String> urlList = new ArrayList<String>();
         for (Journal journal : journalList) {
             urlList.add(journal.getUrl());
@@ -35,10 +38,15 @@ public class Controller {
         return urlList;
     }
 
+    //爬取文献
     public void start() {
         for (Journal url : journalList) {
             if(!url.getUrl().equals("unknow")) {
-                crawJournal(url);
+            	try {
+            		crawJournal(url);
+            	}catch (Exception e) {
+					System.out.println("接着干");
+				}
             }
         }
     }
@@ -47,6 +55,7 @@ public class Controller {
         List<Literature> literatureList = DBHelper.getAllLiture();
         for (Literature literature : literatureList) {
             try {
+            	
                 crawRefer(literature);
             }catch (Exception e){
                 e.printStackTrace();
@@ -54,25 +63,54 @@ public class Controller {
         }
     }
 
+    public void crawContent() {
+    	List<Literature> literatureList = DBHelper.getAllLitureByRank();
+        for (Literature literature : literatureList) {
+            try {
+                crawLiteratureContent(literature);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+	}
+    
+    
     /**
      * 获取页面上的关于文章的内容
      */
     public void crawLiteratureContent(Literature literature) {
     	driver.get(literature.getUrl());
-    	WebElement content = driver.findElement(By.cssSelector("body > div.main > div.content"));
-    	List<WebElement> nodeList = content.findElements(By.xpath("child::*"));
-    	int nodeOrder = 0;
-    	for(WebElement elem:nodeList) {
-    		nodeOrder++;
-    		LiteratureNode literatureNode = new LiteratureNode();
-    		String nodeType = elem.getTagName();
-    		String text = elem.getText();
-    		literatureNode.setName(literature.getName());
-    		literatureNode.setNodeType(nodeType);
-    		literatureNode.setNodeOrder((short) nodeOrder);
-    		literatureNode.setText(text);
-    		DBHelper.insertLiteratureNode(literatureNode);
-    	}
+    	//先切换到html页面
+    	WebDriverWait webDriverWait = new WebDriverWait(driver, 10);
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("DownLoadParts")));
+        WebElement scabDiv = driver.findElement(By.id("DownLoadParts"));
+        WebElement aElem = scabDiv.findElement(By.tagName("a"));
+        if (aElem.getText().contains("HTML")) {
+            trueClick(aElem);
+            switchWindow(1);
+            try {
+            	WebElement content = driver.findElement(By.cssSelector("body > div.main > div.content"));
+            	List<WebElement> nodeList = content.findElements(By.xpath("child::*"));
+            	int nodeOrder = 0;
+            	for(WebElement elem:nodeList) {
+            		nodeOrder++;
+            		LiteratureNode literatureNode = new LiteratureNode();
+            		String nodeType = elem.getTagName();
+            		String text = elem.getText();
+            		literatureNode.setName(literature.getName());
+            		literatureNode.setNodeType(nodeType);
+            		literatureNode.setNodeOrder((short) nodeOrder);
+            		literatureNode.setText(text);
+            		DBHelper.insertLiteratureNode(literatureNode);
+            	}
+            	driver.close();
+				switchWindow(0);
+            }catch (Exception e) {
+				driver.close();
+				switchWindow(0);
+			}
+        }
+    	
     }
     
     
@@ -92,20 +130,26 @@ public class Controller {
         if (aElem.getText().contains("HTML")) {
             trueClick(aElem);
             switchWindow(1);
-            List<String> realRefer = getAllTrueReferList();
-            List<Refer> referList = DBHelper.getAllReferByName(literature.getName());
-            int index = 0;
-            while (index<realRefer.size()){
-                for(Refer refer:referList){
-                    if(realRefer.get(index).contains(refer.getReferName())){
-                        refer.setReferOrder(index+1);
-                        DBHelper.insertRefer(refer);
+            try {
+            	List<String> realRefer = getAllTrueReferList();
+                List<Refer> referList = DBHelper.getAllReferByName(literature.getName());
+                int index = 0;
+                while (index<realRefer.size()){
+                    for(Refer refer:referList){
+                        if(realRefer.get(index).contains(refer.getReferName())){
+                            refer.setReferOrder(index+1);
+                            DBHelper.insertRefer(refer);
+                        }
                     }
+                    index++;
                 }
-                index++;
-            }
-            driver.close();
-            switchWindow(0);
+                driver.close();
+                switchWindow(0);
+            }catch (Exception e) {
+            	driver.close();
+                switchWindow(0);
+			}
+            
         }
 
 
@@ -140,7 +184,7 @@ public class Controller {
             try {
                 int yearNum = Integer.parseInt(year);
                 //从16年开始，以前的爬过了
-                if (yearNum > 2017 || yearNum < 2013) {
+                if (yearNum > 2017 || yearNum < 2017) {
                     continue;
                 }
             } catch (Exception e) {
@@ -161,12 +205,16 @@ public class Controller {
                     switchWindow(1);
                     try {
                         Literature literature = crawLierature();
+                        literature.setRank((long) 1);
                         DBHelper.dumpLiterature(literature);
+                        driver.close();
+                        switchWindow(0);
                     } catch (Exception e) {
+                    	driver.close();
+                        switchWindow(0);
                         e.printStackTrace();
                     }
-                    driver.close();
-                    switchWindow(0);
+                    
                 }
 
             }
@@ -181,7 +229,7 @@ public class Controller {
     private Literature crawLierature() {
         Literature literature = new Literature();
         literature.setUrl(driver.getCurrentUrl());
-        WebDriverWait webDriverWait = new WebDriverWait(driver, 10);
+        WebDriverWait webDriverWait = new WebDriverWait(driver, 5);
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".title")));
         WebElement titleElem = driver.findElement(By.className("title"));
         literature.setName(titleElem.getAttribute("innerHTML"));
@@ -239,25 +287,31 @@ public class Controller {
             int index = 0;
             driver.executeScript("window.open('https://www.baidu.com')");
             switchWindow(1);
-            while (index <= literature.getReferNum() / 10 + 1) {
-                driver.get(urlList.get(index));
-                webDriverWait = new WebDriverWait(driver, 10);
-                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".essayBox")));
-                WebElement essayElem = driver.findElement(By.cssSelector(".essayBox"));
-                WebElement ulElem = essayElem.findElement(By.tagName("ul"));
-                List<WebElement> liElem = ulElem.findElements(By.tagName("li"));
-                for (WebElement liE : liElem) {
-                    try {
-                        WebElement a = liE.findElement(By.tagName("a"));
-                        referUrl.add(a.getAttribute("href"));
-                    } catch (Exception e) {
-
+            try {
+            	while (index <= literature.getReferNum() / 10 + 1) {
+                    driver.get(urlList.get(index));
+                    webDriverWait = new WebDriverWait(driver, 10);
+                    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".essayBox")));
+                    WebElement essayElem = driver.findElement(By.cssSelector(".essayBox"));
+                    WebElement ulElem = essayElem.findElement(By.tagName("ul"));
+                    List<WebElement> liElem = ulElem.findElements(By.tagName("li"));
+                    for (WebElement liE : liElem) {
+                        try {
+                            WebElement a = liE.findElement(By.tagName("a"));
+                            referUrl.add(a.getAttribute("href"));
+                        } catch (Exception e) {
+                        	
+                        }
                     }
+                    index++;
                 }
-                index++;
-            }
-            driver.close();
-            switchWindow(0);
+            	driver.close();
+                switchWindow(0);
+            }catch (Exception e) {
+            	driver.close();
+                switchWindow(0);
+			}
+           
         } else {
             List<WebElement> referElemList = referElem.findElements(By.tagName("li"));
             for (WebElement liE : referElemList) {
@@ -270,17 +324,25 @@ public class Controller {
         driver.switchTo().defaultContent();
         driver.executeScript("window.open('https://www.baidu.com')");
         switchWindow(1);
-        for (String url : referUrl) {
-            driver.get(url);
-            Literature refliterature = crawLierature();
-            DBHelper.insertLiterature(refliterature);
-            Refer refer = new Refer();
-            refer.setName(literature.getName());
-            refer.setReferName(refliterature.getName());
-            DBHelper.insertRefer(refer);
-        }
-        driver.close();
-        switchWindow(0);
+        try {
+        	for (String url : referUrl) {
+                driver.get(url);
+                Literature refliterature = crawLierature();
+                literature.setRank((long) 0);
+                DBHelper.insertLiterature(refliterature);
+                Refer refer = new Refer();
+                refer.setName(literature.getName());
+                refer.setReferName(refliterature.getName());
+                DBHelper.insertRefer(refer);
+            }
+        	driver.close();
+            switchWindow(0);
+        }catch (Exception e) {
+        	driver.close();
+            switchWindow(0);
+		}
+       
+        
         //添加order信息
     }
 
@@ -301,18 +363,23 @@ public class Controller {
     }
 
     private void trueClick(WebElement element) {
-        while (true) {
+    	int sleepTime = 1000;
+    	Boolean flag=true;
+        while (flag) {
             try {
                 Actions actions = new Actions(driver);
                 actions.moveToElement(element);
                 actions.click(element);
                 actions.perform();
-                Thread.sleep(1000);
+                Thread.sleep(sleepTime);
                 break;
             } catch (Exception e) {
                 e.printStackTrace();
+                if(sleepTime>2000) {
+                	flag=false;
+                }
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(sleepTime+=100);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }

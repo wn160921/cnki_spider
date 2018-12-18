@@ -9,4 +9,6 @@ public interface LiteratureMapper {
     public void insert(Literature literature);
     public Literature selectByName(String value);
     public void update(Literature literature);
+    
+    public List<Literature> selectByRank(Long rank);
 }

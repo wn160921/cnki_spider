@@ -12,6 +12,8 @@ public class Literature {
     Integer year;
     Integer phase;
     List<Refer> referList;
+    Long rank;
+    
 
     public String getUrl() {
         return url;
@@ -76,4 +78,13 @@ public class Literature {
     public void setPhase(Integer phase) {
         this.phase = phase;
     }
+
+	public Long getRank() {
+		return rank;
+	}
+
+	public void setRank(Long rank) {
+		this.rank = rank;
+	}
+    
 }

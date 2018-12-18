@@ -4,12 +4,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.wangning.mapper.JournalMapper">
     <select id="selectAll" resultType="xin.wangning.vo.Journal">
-        select * from db_owner.期刊表
+        select * from 期刊表
     </select>
     <insert id="insert" parameterType="xin.wangning.vo.Journal">
-        insert into db_owner.期刊表(name,url)values(#{name},#{url})
+        insert into 期刊表(name,url,rank)values(#{name},#{url},#{rank})
     </insert>
     <select id="selectByName" parameterType="String" resultType="xin.wangning.vo.Journal">
-        select * from db_owner.期刊表 where name = #{value}
+        select * from 期刊表 where name = #{value}
+    </select>
+    <select id="selectByRank" parameterType="Long" resultType="xin.wangning.vo.Journal">
+        select * from 期刊表 where rank = #{rank}
     </select>
 </mapper>
