@@ -15,7 +15,10 @@
     <update id="update" parameterType="xin.wangning.vo.Literature">
         update 文献表 set url=#{url},classify=#{classify},refer_num=#{referNum} where name=#{name}
     </update>
+    <update id="updateRank" parameterType="xin.wangning.vo.Literature">
+        update 文献表 set rank=#{rank} where name=#{name}
+    </update>
     <select id="selectByRank" parameterType="Long" resultType="xin.wangning.vo.Literature">
-        select * from 文献表 where rank = #{rank}
+        select * from 文献表 where rank = #{rank} and refer_num>0
     </select>
 </mapper>

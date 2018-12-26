@@ -12,6 +12,6 @@ public class Main {
         Controller controller = new Controller();
 //        controller.start();
         controller.crawRefer();
-        controller.crawContent();
+//        controller.crawContent();
     }
 }

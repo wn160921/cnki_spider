@@ -22,6 +22,15 @@ import java.util.List;
 public class DBHelper {
     private static SqlSessionFactory sqlSessionFactory = null;
 
+    public static void updateLieratureRank(Literature literature){
+        SqlSession sqlSession = getSqlSessionFactory().openSession();
+        LiteratureMapper literatureMapper = sqlSession.getMapper(LiteratureMapper.class);
+        literatureMapper.updateRank(literature);
+        sqlSession.commit();
+        sqlSession.close();
+    }
+
+
     public static SqlSessionFactory getSqlSessionFactory() {
         if (sqlSessionFactory != null) {
             return sqlSessionFactory;
@@ -104,10 +113,10 @@ public class DBHelper {
         return literatureList;
     }
     
-    public static List<Literature> getAllLitureByRank() {
+    public static List<Literature> getAllLitureByRank(Long l) {
         SqlSession sqlSession = getSqlSessionFactory().openSession();
         LiteratureMapper literatureMapper = sqlSession.getMapper(LiteratureMapper.class);
-        List<Literature> literatureList = literatureMapper.selectByRank(1L);
+        List<Literature> literatureList = literatureMapper.selectByRank(l);
         sqlSession.close();
         return literatureList;
     }

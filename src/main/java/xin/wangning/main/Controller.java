@@ -23,8 +23,8 @@ public class Controller {
 
     public Controller() {
         driver = new ChromeDriver();
-        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
-        driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
+        driver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
 //        driver.manage().window().maximize();
         journalList = DBHelper.getJournalListByRank();
     }
@@ -52,23 +52,43 @@ public class Controller {
     }
 
     public void crawRefer() {
-        List<Literature> literatureList = DBHelper.getAllLiture();
+        List<Literature> literatureList = DBHelper.getAllLitureByRank(2L);
         for (Literature literature : literatureList) {
             try {
-            	
                 crawRefer(literature);
+                literature.setRank(3L);
+                DBHelper.updateLieratureRank(literature);
             }catch (Exception e){
+                driver.close();
+                driver = new ChromeDriver();
+                driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
+                driver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 e.printStackTrace();
             }
         }
     }
 
     public void crawContent() {
-    	List<Literature> literatureList = DBHelper.getAllLitureByRank();
+    	List<Literature> literatureList = DBHelper.getAllLitureByRank(1L);
         for (Literature literature : literatureList) {
             try {
                 crawLiteratureContent(literature);
+                Thread.sleep(1000);
             }catch (Exception e){
+                driver.close();
+                driver = new ChromeDriver();
+                driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
+                driver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 e.printStackTrace();
             }
         }
@@ -103,12 +123,18 @@ public class Controller {
             		literatureNode.setText(text);
             		DBHelper.insertLiteratureNode(literatureNode);
             	}
+            	literature.setRank(2L);
+            	DBHelper.updateLieratureRank(literature);
             	driver.close();
 				switchWindow(0);
             }catch (Exception e) {
 				driver.close();
 				switchWindow(0);
 			}
+        }else{
+            //not have
+            literature.setRank(10L);
+            DBHelper.updateLieratureRank(literature);
         }
     	
     }
@@ -183,8 +209,8 @@ public class Controller {
             String year = yearElem.findElement(By.tagName("em")).getText();
             try {
                 int yearNum = Integer.parseInt(year);
-                //从16年开始，以前的爬过了
-                if (yearNum > 2017 || yearNum < 2017) {
+
+                if (yearNum > 2017 || yearNum < 2013) {
                     continue;
                 }
             } catch (Exception e) {
@@ -241,13 +267,18 @@ public class Controller {
         String jdataText = jdate.getText();
         String year = jdataText.substring(0, 4);
         String phase = jdataText.substring(5, 7);
+        if(phase.contains("S")||phase.contains("s")){
+            phase = phase.replaceAll("s|S","");
+            literature.setPhase(Integer.parseInt(phase)+100);
+        }else {
+            literature.setPhase(Integer.parseInt(phase));
+        }
         Journal journal = new Journal();
         journal.setName(jname);
         journal.setUrl("unknow");
         DBHelper.insertJournal(journal);
         literature.setBelong(jname);
         literature.setYear(Integer.parseInt(year));
-        literature.setPhase(Integer.parseInt(phase));
         List<WebElement> pList = driver.findElements(By.tagName("p"));
         for (WebElement e : pList) {
             if (e.getText().contains("分类号")) {
@@ -315,8 +346,12 @@ public class Controller {
         } else {
             List<WebElement> referElemList = referElem.findElements(By.tagName("li"));
             for (WebElement liE : referElemList) {
-                WebElement aElem = liE.findElement(By.tagName("a"));
-                referUrl.add(aElem.getAttribute("href"));
+                try{
+                    WebElement aElem = liE.findElement(By.tagName("a"));
+                    referUrl.add(aElem.getAttribute("href"));
+                }catch (Exception e){
+
+                }
             }
         }
 
@@ -364,6 +399,11 @@ public class Controller {
 
     private void trueClick(WebElement element) {
     	int sleepTime = 1000;
+        try {
+            Thread.sleep(sleepTime+=100);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
     	Boolean flag=true;
         while (flag) {
             try {

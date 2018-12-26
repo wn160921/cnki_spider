@@ -11,12 +11,12 @@
             <transactionManager type="JDBC"></transactionManager>
             <!-- UNPOOLED POOLED JNDI -->
             <dataSource type="POOLED">
-                <property name="driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-                <property name="url" value="jdbc:sqlserver://localhost:1433;DatabaseName=cnki" />
-                <property name="username" value="wn" />
+                <property name="driver" value="com.mysql.jdbc.Driver" />
+                <property name="url" value="jdbc:mysql://localhost:3306/cnki?useUnicode=true&amp;characterEncoding=UTF-8" />
+                <property name="username" value="root" />
                 <property name="password" value="123456" />
-                <property name="poolMaximumActiveConnections" value="1"></property>
-                <property name="poolMaximumIdleConnections" value="1"></property>
+                <property name="poolMaximumActiveConnections" value="2"></property>
+                <property name="poolMaximumIdleConnections" value="2"></property>
             </dataSource>
         </environment>
     </environments>
