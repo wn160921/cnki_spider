@@ -78,8 +78,11 @@ public class Controller {
         for (Literature literature : literatureList) {
             try {
                 crawLiteratureContent(literature);
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             }catch (Exception e){
+                //c
+                literature.setRank(12L);
+                DBHelper.updateLieratureRank(literature);
                 driver.close();
                 driver = new ChromeDriver();
                 driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
@@ -128,6 +131,9 @@ public class Controller {
             	driver.close();
 				switchWindow(0);
             }catch (Exception e) {
+                //no liter content
+                literature.setRank(11L);
+                DBHelper.updateLieratureRank(literature);
 				driver.close();
 				switchWindow(0);
 			}

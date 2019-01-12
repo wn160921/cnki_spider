@@ -5,11 +5,11 @@
 <mapper namespace="xin.wangning.mapper.LiteratureNodeMapper">
 	<select id="selectAll" resultType="xin.wangning.vo.LiteratureNode">
 		SELECT *
- 		FROM 文献节点表
+ 		FROM literature_node_tb
 	</select>
 	
 	<insert id="insert" parameterType="xin.wangning.vo.LiteratureNode">
-		insert into 文献节点表(name,node_type,node_order,text)
+		insert into literature_node_tb(name,node_type,node_order,text)
 		values(#{name},#{nodeType},#{nodeOrder},#{text})
 	</insert>
 	

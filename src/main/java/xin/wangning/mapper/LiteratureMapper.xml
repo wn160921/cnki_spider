@@ -4,21 +4,21 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xin.wangning.mapper.LiteratureMapper">
     <select id="selectAll" resultType="xin.wangning.vo.Literature">
-        select * from 文献表
+        select * from literature_tb
     </select>
     <insert id="insert" parameterType="xin.wangning.vo.Literature">
-        insert into 文献表(name,url,classify,refer_num,belong,year,phase,rank)values(#{name},#{url},#{classify},#{referNum},#{belong},#{year},#{phase},#{rank})
+        insert into literature_tb(name,url,classify,refer_num,belong,year,phase,rank)values(#{name},#{url},#{classify},#{referNum},#{belong},#{year},#{phase},#{rank})
     </insert>
     <select id="selectByName" parameterType="String" resultType="xin.wangning.vo.Literature">
-        select * from 文献表 where name = #{value}
+        select * from literature_tb where name = #{value}
     </select>
     <update id="update" parameterType="xin.wangning.vo.Literature">
-        update 文献表 set url=#{url},classify=#{classify},refer_num=#{referNum} where name=#{name}
+        update literature_tb set url=#{url},classify=#{classify},refer_num=#{referNum} where name=#{name}
     </update>
     <update id="updateRank" parameterType="xin.wangning.vo.Literature">
-        update 文献表 set rank=#{rank} where name=#{name}
+        update literature_tb set rank=#{rank} where name=#{name}
     </update>
     <select id="selectByRank" parameterType="Long" resultType="xin.wangning.vo.Literature">
-        select * from 文献表 where rank = #{rank} and refer_num>0
+        select * from literature_tb where rank = #{rank} and refer_num>0
     </select>
 </mapper>
